@@ -18,7 +18,7 @@ x1,y1 ------
 
 
 class Net:
-    def __init__(self, graph_fp, labels_fp, num_classes=90, threshold=0.5):
+    def __init__(self, graph_fp, labels_fp, num_classes=90, threshold=0.6):
         self.graph_fp = graph_fp
         self.labels_fp = labels_fp
         self.num_classes = num_classes
