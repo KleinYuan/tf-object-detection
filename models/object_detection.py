@@ -2,7 +2,6 @@ import sys
 import cv2
 import numpy as np
 import tensorflow as tf
-from PIL import Image
 from copy import deepcopy
 sys.path.append("..")
 import lib.label_map_util
@@ -34,12 +33,6 @@ class Net:
         self.threshold = threshold
         self._load_graph()
         self._load_labels()
-
-    @staticmethod
-    def _load_image_into_numpy_array(img):
-        (im_width, im_height) = img.size
-        return np.array(img.getdata()).reshape(
-            (im_height, im_width, 3)).astype(np.uint8)
 
     def _load_labels(self):
         self.label_map = lib.label_map_util.load_labelmap(self.labels_fp)
@@ -83,14 +76,11 @@ class Net:
             print 'Read the image ..'
 
             img_origin = deepcopy(img)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+            img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             height, width, _ = img.shape
             print 'Shape of this image is -- [heigh: %s, width: %s]' % (height, width)
-            img = Image.fromarray(img)
 
-            image_np = self._load_image_into_numpy_array(img)
-
-            image_np_expanded = np.expand_dims(image_np, axis=0)
+            image_np_expanded = np.expand_dims(img, axis=0)
             image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
             boxes = self.graph.get_tensor_by_name('detection_boxes:0')
             scores = self.graph.get_tensor_by_name('detection_scores:0')
