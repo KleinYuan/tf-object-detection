@@ -65,8 +65,8 @@ class Net:
                         font_color,
                         line_type)
         cv2.imshow('img', display_img)
-        cv2.waitKey()
-        cv2.destroyAllWindows()
+        # cv2.waitKey()
+        # cv2.destroyAllWindows()
 
     def predict(self, img):
         tf_config = tf.ConfigProto(device_count={'GPU': 0})
