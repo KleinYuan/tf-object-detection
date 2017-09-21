@@ -10,6 +10,7 @@ net = object_detection.Net(graph_fp='%s/frozen_inference_graph.pb' % model_name,
                            threshold=0.6)
 CAMERA_MODE = 'camera'
 STATIC_MODE = 'static'
+IMAGE_SIZE = 320
 
 
 def demo(mode=CAMERA_MODE):
@@ -24,7 +25,8 @@ def demo(mode=CAMERA_MODE):
         while True:
             start = datetime.datetime.now().microsecond*0.001
             ret, frame = cap.read()
-            net.predict(img=frame)
+            frame_out = cv2.resize(frame, (IMAGE_SIZE, IMAGE_SIZE))
+            net.predict(img=frame_out)
             end = datetime.datetime.now().microsecond*0.001
             elapse = end - start
             print elapse
