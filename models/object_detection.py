@@ -50,8 +50,12 @@ class Net:
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
 
-    def _display(self, filtered_results, img):
-        display_img = deepcopy(img)
+    def _display(self, filtered_results, processed_img, display_img):
+        h, w, _ = processed_img.shape
+        h_dis, w_dis, _ = display_img.shape
+        ratio_h = h_dis / h
+        ratio_w = w_dis / w
+
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 1
         font_color = (0, 255, 0)
@@ -59,6 +63,8 @@ class Net:
         offset = 20
         for res in filtered_results:
             y1, x1, y2, x2 = res["bb_o"]
+            y1, y2 = y1 * ratio_h, y2 * ratio_h
+            x1, x2 = x1 * ratio_w, x2 * ratio_w
             cv2.rectangle(display_img, (x1, y1), (x2, y2), (255, 0, 0), 2)
             cv2.putText(display_img, res["class"],
                         (x1 + offset, y1 - offset),
@@ -75,12 +81,12 @@ class Net:
         tf_config.gpu_options.allow_growth = True
         self.session = tf.Session(config=tf_config, graph=self.graph)
 
-    def predict(self, img):
+    def predict(self, img, display_img):
 
         with self.graph.as_default():
             print 'Read the image ..'
 
-            img_origin = deepcopy(img)
+            img_copy = deepcopy(img)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             height, width, _ = img.shape
             print 'Shape of this image is -- [heigh: %s, width: %s]' % (height, width)
@@ -118,7 +124,7 @@ class Net:
                     print '%s: %s' % (predicted_class, score)
 
             print 'Displaying %s objects against raw images ... ' % num_detections
-            self._display(filtered_results, img=img_origin)
+            self._display(filtered_results, processed_img=img_copy, display_img=display_img)
 
         # You may feel a little bit ugly below and wonder why we don't use "with", but dude, this is a tensorflow bug,
         # and if you don't do this, your machine memory is gonna explode. bang!

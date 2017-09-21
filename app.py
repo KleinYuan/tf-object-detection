@@ -15,8 +15,9 @@ IMAGE_SIZE = 320
 
 def demo(mode=CAMERA_MODE):
     if mode == STATIC_MODE:
-        img = 'test_images/1.jpg'
-        net.predict(img=cv2.imread(img))
+        img_fp = 'test_images/1.jpg'
+        img = cv2.imread(img_fp)
+        net.predict(img=img, display_img=img)
         cv2.waitKey()
         cv2.destroyAllWindows()
     elif mode == CAMERA_MODE:
@@ -25,11 +26,11 @@ def demo(mode=CAMERA_MODE):
         while True:
             start = datetime.datetime.now().microsecond*0.001
             ret, frame = cap.read()
-            frame_out = cv2.resize(frame, (IMAGE_SIZE, IMAGE_SIZE))
-            net.predict(img=frame_out)
+            resized_frame = cv2.resize(frame, (IMAGE_SIZE, IMAGE_SIZE))
+            net.predict(img=resized_frame, display_img=frame)
             end = datetime.datetime.now().microsecond*0.001
             elapse = end - start
-            print elapse
+            print 'Elapse: ', elapse, ' ms'
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 
