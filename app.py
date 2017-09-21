@@ -22,10 +22,10 @@ def demo(mode=CAMERA_MODE):
         cap = cv2.VideoCapture(0)
 
         while True:
-            start = datetime.datetime.now().second
+            start = datetime.datetime.now().microsecond*0.001
             ret, frame = cap.read()
             net.predict(img=frame)
-            end = datetime.datetime.now().second
+            end = datetime.datetime.now().microsecond*0.001
             elapse = end - start
             print elapse
             if cv2.waitKey(1) & 0xFF == ord('q'):
