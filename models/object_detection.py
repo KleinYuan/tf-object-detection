@@ -35,11 +35,13 @@ class Net:
         self.classes = None
         self.num_detections = None
 
+        self.in_progress = False
         self.session = None
         self.threshold = threshold
-        self._load_graph()
-        self._load_labels()
-        self._init_predictor()
+        with tf.device('/gpu:0'):
+            self._load_graph()
+            self._load_labels()
+            self._init_predictor()
 
     def _load_labels(self):
         self.label_map = lib.label_map_util.load_labelmap(self.labels_fp)
@@ -82,7 +84,7 @@ class Net:
         # cv2.destroyAllWindows()
 
     def _init_predictor(self):
-        tf_config = tf.ConfigProto(device_count={'GPU': 0})
+        tf_config = tf.ConfigProto(device_count={'gpu': 0}, log_device_placement=True)
         tf_config.gpu_options.allow_growth = True
         with self.graph.as_default():
             self.session = tf.Session(config=tf_config, graph=self.graph)
@@ -93,6 +95,7 @@ class Net:
             self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
 
     def predict(self, img, display_img):
+        self.in_progress = True
         start = datetime.datetime.now().microsecond * 0.001
 
         with self.graph.as_default():
@@ -106,12 +109,13 @@ class Net:
             image_np_expanded = np.expand_dims(img, axis=0)
 
             print '[INFO] Detecting objects ...'
+            session_start = datetime.datetime.now().microsecond * 0.001
             (boxes, scores, classes, num_detections) = self.session.run(
                 [self.boxes, self.scores, self.classes, self.num_detections],
                 feed_dict={
                     self.image_tensor: image_np_expanded
                 })
-
+            session_end = datetime.datetime.now().microsecond * 0.001
             print '[INFO] Filtering results ...'
             filtered_results = []
             for i in range(0, num_detections):
@@ -133,14 +137,25 @@ class Net:
                     print '[INFO] %s: %s' % (predicted_class, score)
 
             # print 'Displaying %s objects against raw images ... ' % num_detections
+
+            end = datetime.datetime.now().microsecond * 0.001
+            elapse = end - start
+            fps = np.round(1000.0 / elapse, 3)
+            session_elapse = session_end - session_start
+            sfps = np.round(1000.0 / session_elapse, 3)
+            print '+++++++++++++++++++++++ SFPS: ', sfps
+            print '----------------------- FPS: ', fps
+            if fps > 0:
+                cv2.putText(display_img, 'FPS: %s' % fps, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             self._display(filtered_results, processed_img=img_copy, display_img=display_img)
-        end = datetime.datetime.now().microsecond * 0.001
-        elapse = end - start
-        print '----------------------- FPS: ', 1000.0/elapse
         # You may feel a little bit ugly below and wonder why we don't use "with", but dude, this is a tensorflow bug,
         # and if you don't do this, your machine memory is gonna explode. bang!
         # session.close()
         # del session
+        self.in_progress = False
+
+    def get_status(self):
+        return self.in_progress
 
     def kill_predictor(self):
         self.session.close()
