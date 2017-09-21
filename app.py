@@ -1,7 +1,6 @@
 from models import object_detection
 from config import config
 import cv2
-import datetime
 
 model_name = config.models["1"]
 net = object_detection.Net(graph_fp='%s/frozen_inference_graph.pb' % model_name,
@@ -24,13 +23,12 @@ def demo(mode=CAMERA_MODE):
         cap = cv2.VideoCapture(0)
 
         while True:
-            start = datetime.datetime.now().microsecond*0.001
             ret, frame = cap.read()
-            resized_frame = cv2.resize(frame, (IMAGE_SIZE, IMAGE_SIZE))
-            net.predict(img=resized_frame, display_img=frame)
-            end = datetime.datetime.now().microsecond*0.001
-            elapse = end - start
-            print 'Elapse: ', elapse, ' ms'
+            if ret:
+                resize_frame = cv2.resize(frame, (IMAGE_SIZE, IMAGE_SIZE))
+                net.predict(img=resize_frame, display_img=frame)
+            else:
+                print '[ERROR] Drop Frame'
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
 

@@ -5,7 +5,7 @@ import tensorflow as tf
 from copy import deepcopy
 sys.path.append("..")
 import lib.label_map_util
-
+import datetime
 
 '''
 x1,y1 ------
@@ -29,6 +29,11 @@ class Net:
 
         self.bb = None
         self.bb_origin = None
+        self.image_tensor = None
+        self.boxes = None
+        self.scores = None
+        self.classes = None
+        self.num_detections = None
 
         self.session = None
         self.threshold = threshold
@@ -79,35 +84,39 @@ class Net:
     def _init_predictor(self):
         tf_config = tf.ConfigProto(device_count={'GPU': 0})
         tf_config.gpu_options.allow_growth = True
-        self.session = tf.Session(config=tf_config, graph=self.graph)
+        with self.graph.as_default():
+            self.session = tf.Session(config=tf_config, graph=self.graph)
+            self.image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
+            self.boxes = self.graph.get_tensor_by_name('detection_boxes:0')
+            self.scores = self.graph.get_tensor_by_name('detection_scores:0')
+            self.classes = self.graph.get_tensor_by_name('detection_classes:0')
+            self.num_detections = self.graph.get_tensor_by_name('num_detections:0')
 
     def predict(self, img, display_img):
+        start = datetime.datetime.now().microsecond * 0.001
 
         with self.graph.as_default():
-            print 'Read the image ..'
+            print '[INFO] Read the image ..'
 
             img_copy = deepcopy(img)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             height, width, _ = img.shape
-            print 'Shape of this image is -- [heigh: %s, width: %s]' % (height, width)
+            print '[INFO] Shape of this image is -- [heigh: %s, width: %s]' % (height, width)
 
             image_np_expanded = np.expand_dims(img, axis=0)
-            image_tensor = self.graph.get_tensor_by_name('image_tensor:0')
-            boxes = self.graph.get_tensor_by_name('detection_boxes:0')
-            scores = self.graph.get_tensor_by_name('detection_scores:0')
-            classes = self.graph.get_tensor_by_name('detection_classes:0')
-            num_detections = self.graph.get_tensor_by_name('num_detections:0')
 
-            print 'Detecting objects ...'
+            print '[INFO] Detecting objects ...'
             (boxes, scores, classes, num_detections) = self.session.run(
-                [boxes, scores, classes, num_detections],
-                feed_dict={image_tensor: image_np_expanded})
+                [self.boxes, self.scores, self.classes, self.num_detections],
+                feed_dict={
+                    self.image_tensor: image_np_expanded
+                })
 
-            print 'Filtering results ...'
+            print '[INFO] Filtering results ...'
             filtered_results = []
             for i in range(0, num_detections):
                 score = scores[0][i]
-                if score >= self.threshold :
+                if score >= self.threshold:
                     y1, x1, y2, x2 = boxes[0][i]
                     y1_o = int(y1 * height)
                     x1_o = int(x1 * width)
@@ -121,11 +130,13 @@ class Net:
                         "img_size": [height, width],
                         "class": predicted_class
                     })
-                    print '%s: %s' % (predicted_class, score)
+                    print '[INFO] %s: %s' % (predicted_class, score)
 
-            print 'Displaying %s objects against raw images ... ' % num_detections
+            # print 'Displaying %s objects against raw images ... ' % num_detections
             self._display(filtered_results, processed_img=img_copy, display_img=display_img)
-
+        end = datetime.datetime.now().microsecond * 0.001
+        elapse = end - start
+        print '----------------------- FPS: ', 1000.0/elapse
         # You may feel a little bit ugly below and wonder why we don't use "with", but dude, this is a tensorflow bug,
         # and if you don't do this, your machine memory is gonna explode. bang!
         # session.close()
