@@ -56,6 +56,7 @@ class Net:
                 serialized_graph = fid.read()
                 od_graph_def.ParseFromString(serialized_graph)
                 tf.import_graph_def(od_graph_def, name='')
+        tf.get_default_graph().finalize()
 
     def _display(self, filtered_results, processed_img, display_img):
         h, w, _ = processed_img.shape
