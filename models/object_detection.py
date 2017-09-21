@@ -30,9 +30,11 @@ class Net:
         self.bb = None
         self.bb_origin = None
 
+        self.session = None
         self.threshold = threshold
         self._load_graph()
         self._load_labels()
+        self._init_predictor()
 
     def _load_labels(self):
         self.label_map = lib.label_map_util.load_labelmap(self.labels_fp)
@@ -68,10 +70,13 @@ class Net:
         # cv2.waitKey()
         # cv2.destroyAllWindows()
 
-    def predict(self, img):
+    def _init_predictor(self):
         tf_config = tf.ConfigProto(device_count={'GPU': 0})
         tf_config.gpu_options.allow_growth = True
-        session = tf.Session(config=tf_config, graph=self.graph)
+        self.session = tf.Session(config=tf_config, graph=self.graph)
+
+    def predict(self, img):
+
         with self.graph.as_default():
             print 'Read the image ..'
 
@@ -88,7 +93,7 @@ class Net:
             num_detections = self.graph.get_tensor_by_name('num_detections:0')
 
             print 'Detecting objects ...'
-            (boxes, scores, classes, num_detections) = session.run(
+            (boxes, scores, classes, num_detections) = self.session.run(
                 [boxes, scores, classes, num_detections],
                 feed_dict={image_tensor: image_np_expanded})
 
@@ -117,5 +122,9 @@ class Net:
 
         # You may feel a little bit ugly below and wonder why we don't use "with", but dude, this is a tensorflow bug,
         # and if you don't do this, your machine memory is gonna explode. bang!
-        session.close()
-        del session
+        # session.close()
+        # del session
+
+    def kill_predictor(self):
+        self.session.close()
+        self.session = None

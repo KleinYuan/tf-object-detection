@@ -18,7 +18,7 @@ def demo(mode=CAMERA_MODE):
         cv2.waitKey()
         cv2.destroyAllWindows()
     elif mode == CAMERA_MODE:
-        cap = cv2.VideoCapture(0)
+        cap = cv2.VideoCapture(1)
 
         while True:
 
@@ -33,4 +33,4 @@ def demo(mode=CAMERA_MODE):
 
 
 if __name__ == '__main__':
-    demo(mode=STATIC_MODE)
+    demo(mode=CAMERA_MODE)
