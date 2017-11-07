@@ -33,7 +33,7 @@ python app.py
 
 ```
 
-![res](https://user-images.githubusercontent.com/8921629/30366490-168b72cc-9820-11e7-9dab-18504e44b1d7.png)
+![res](https://user-images.githubusercontent.com/8921629/32482793-24968e20-c34e-11e7-9810-4aef685d067f.jpg)
 
 # Image Classifications
 

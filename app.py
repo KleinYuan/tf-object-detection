@@ -3,7 +3,7 @@ from config import config
 import cv2
 import tensorflow as tf
 
-model_name = config.models["1"]
+model_name = config.models["2"]
 net = object_detection.Net(graph_fp='%s/frozen_inference_graph.pb' % model_name,
                            labels_fp='data/label.pbtxt',
                            num_classes=90,
@@ -40,4 +40,4 @@ def demo(mode=CAMERA_MODE):
 
 
 if __name__ == '__main__':
-    demo(mode=CAMERA_MODE)
+    demo(mode=STATIC_MODE)
