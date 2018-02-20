@@ -61,8 +61,8 @@ class Net:
     def _display(self, filtered_results, processed_img, display_img):
         h, w, _ = processed_img.shape
         h_dis, w_dis, _ = display_img.shape
-        ratio_h = h_dis / h
-        ratio_w = w_dis / w
+        ratio_h = float(h_dis) / h
+        ratio_w = float(w_dis) / w
 
         font = cv2.FONT_HERSHEY_SIMPLEX
         font_scale = 1
@@ -71,8 +71,8 @@ class Net:
         offset = 20
         for res in filtered_results:
             y1, x1, y2, x2 = res["bb_o"]
-            y1, y2 = y1 * ratio_h, y2 * ratio_h
-            x1, x2 = x1 * ratio_w, x2 * ratio_w
+            y1, y2 = int(y1 * ratio_h), int(y2 * ratio_h)
+            x1, x2 = int(x1 * ratio_w), int(x2 * ratio_w)
             cv2.rectangle(display_img, (x1, y1), (x2, y2), (255, 0, 0), 2)
             cv2.putText(display_img, res["class"],
                         (x1 + offset, y1 - offset),
