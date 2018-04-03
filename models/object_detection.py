@@ -5,7 +5,6 @@ import tensorflow as tf
 from copy import deepcopy
 sys.path.append("..")
 import lib.label_map_util
-import datetime
 
 '''
 x1,y1 ------
@@ -97,27 +96,24 @@ class Net:
 
     def predict(self, img, display_img):
         self.in_progress = True
-        start = datetime.datetime.now().microsecond * 0.001
 
         with self.graph.as_default():
-            print '[INFO] Read the image ..'
+            print('[INFO] Read the image ..')
 
             img_copy = deepcopy(img)
             img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
             height, width, _ = img.shape
-            print '[INFO] Shape of this image is -- [heigh: %s, width: %s]' % (height, width)
+            print('[INFO] Shape of this image is -- [heigh: %s, width: %s]' % (height, width))
 
             image_np_expanded = np.expand_dims(img, axis=0)
 
-            print '[INFO] Detecting objects ...'
-            session_start = datetime.datetime.now().microsecond * 0.001
+            print('[INFO] Detecting objects ...')
             (boxes, scores, classes, num_detections) = self.session.run(
                 [self.boxes, self.scores, self.classes, self.num_detections],
                 feed_dict={
                     self.image_tensor: image_np_expanded
                 })
-            session_end = datetime.datetime.now().microsecond * 0.001
-            print '[INFO] Filtering results ...'
+            print('[INFO] Filtering results ...')
             filtered_results = []
             for i in range(0, num_detections):
                 score = scores[0][i]
@@ -135,19 +131,8 @@ class Net:
                         "img_size": [height, width],
                         "class": predicted_class
                     })
-                    print '[INFO] %s: %s' % (predicted_class, score)
+                    print('[INFO] %s: %s' % (predicted_class, score))
 
-            # print 'Displaying %s objects against raw images ... ' % num_detections
-
-            end = datetime.datetime.now().microsecond * 0.001
-            elapse = end - start
-            fps = np.round(1000.0 / elapse, 3)
-            session_elapse = session_end - session_start
-            sfps = np.round(1000.0 / session_elapse, 3)
-            print '+++++++++++++++++++++++ SFPS: ', sfps
-            print '----------------------- FPS: ', fps
-            if fps > 0:
-                cv2.putText(display_img, 'FPS: %s' % fps, (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
             self._display(filtered_results, processed_img=img_copy, display_img=display_img)
         # You may feel a little bit ugly below and wonder why we don't use "with", but dude, this is a tensorflow bug,
         # and if you don't do this, your machine memory is gonna explode. bang!

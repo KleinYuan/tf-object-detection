@@ -24,4 +24,4 @@ with tf.device('/cpu:0'):
 
         prediction = synset[pred[0]]
         confidence = prob[pred[0]]
-        print 'Prediction is ', prediction, '\nConfidence is ', confidence
+        print('Prediction is %s\nConfidence is %s' %(prediction, confidence))

@@ -31,7 +31,7 @@ def demo(mode=CAMERA_MODE):
                     resize_frame = cv2.resize(frame, (IMAGE_SIZE, IMAGE_SIZE))
                     net.predict(img=resize_frame, display_img=frame)
                 else:
-                    print '[Warning] drop frame or in progress'
+                    print('[Warning] drop frame or in progress')
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     break
 
