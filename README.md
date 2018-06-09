@@ -1,3 +1,16 @@
+# Scope
+
+This repo is aiming to provide production ready **2D object detection** code basics.
+
+It's based on official tensorflow API jupyter notebook but I will gradually add more popular models such as `yolo` series.
+
+### Others
+
+If you are interested in **3D object detection**, visit this [repo](https://github.com/KleinYuan/tf-3d-object-detection).
+
+If you are interested in **Segmentation**, visit this [repo](https://github.com/KleinYuan/tf-segmentation).
+
+
 # Introduction
 
 This is a repo for implementing object detection with pre-trained models (as shown below) on tensorflow.
