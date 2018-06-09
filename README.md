@@ -4,7 +4,7 @@ This repo is aiming to provide production ready **2D object detection** code bas
 
 It's based on official tensorflow API jupyter notebook but I will gradually add more popular models such as `yolo` series.
 
-### Others
+### More
 
 If you are interested in **3D object detection**, visit this [repo](https://github.com/KleinYuan/tf-3d-object-detection).
 
